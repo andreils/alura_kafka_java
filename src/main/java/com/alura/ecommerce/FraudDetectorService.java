@@ -15,23 +15,26 @@ public class FraudDetectorService {
         var consumer = new KafkaConsumer<>(properties());
         consumer.subscribe(Collections.singletonList("ECOMMERCE_NEW_ORDER"));
         while (true){
-            System.out.println("Procurando");
             var records = consumer.poll(Duration.ofMillis(100));
             if(!records.isEmpty()){
                 System.out.println("Encontrou " + records.count());
+                var i = 1;
                 for (var record : records){
                     System.out.println("============================");
                     System.out.println("Processing new order, checking for fraud");
                     System.out.println("KEY " + record.key());
                     System.out.println("VALOR " + record.value());
                     System.out.println("OFFSET " + record.offset());
+                    System.out.println("PARTITION " + record.partition());
+                    System.out.println("PROCESSASNDO " + i + " : " + records.count());
                     System.out.println("Order processed");
+
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
         }
     }
@@ -42,6 +45,8 @@ public class FraudDetectorService {
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.getSimpleName());
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
+
         return properties;
     }
 }
