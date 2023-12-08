@@ -1,33 +1,31 @@
 package com.alura.ecommerce;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class LogService {
 
     public static void main(String[] args)  {
-        var consumer = new KafkaConsumer<>(properties());
-        consumer.subscribe(Pattern.compile("ECOMMERCE.*"));
-        while (true){
-            var records = consumer.poll(Duration.ofMillis(100));
-            if(!records.isEmpty()){
-                System.out.println("Encontrou " + records.count());
-                for (var record : records){
-                    System.out.println("============================");
-                    System.out.println("LOG " + record.topic() );
-                    System.out.println("KEY " + record.key());
-                    System.out.println("VALOR " + record.value());
-                    System.out.println("OFFSET " + record.offset());
-                    System.out.println("LOG processed");
-                }
-            }
+        var logService = new LogService();
+        try (var kafkaService = new KafkaService(LogService.class.getSimpleName(),
+                Pattern.compile("ECOMMERCE.*"),
+                logService::parser); ){
+
+            kafkaService.run();
         }
+    }
+
+    private void parser(ConsumerRecord<String, String> record) {
+        System.out.println("============================");
+        System.out.println("LOG " + record.topic() );
+        System.out.println("KEY " + record.key());
+        System.out.println("VALOR " + record.value());
+        System.out.println("OFFSET " + record.offset());
+        System.out.println("LOG processed");
     }
 
     private static Properties properties() {

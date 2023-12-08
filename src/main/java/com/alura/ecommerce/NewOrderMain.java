@@ -1,34 +1,27 @@
 package com.alura.ecommerce;
 
 import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalField;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.random.RandomGenerator;
 
 public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var producer = new KafkaProducer<String, String>(properties());
-        for(int i = 0; i < 100; i++){
-            System.out.println("Enviando mensagem " + i);
-            var key = UUID.randomUUID().toString();
-            var value = key + ";9023;88091;" + LocalDateTime.now().getMinute() + "_" + LocalDateTime.now().getSecond();
-            var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", key, value);
-            producer.send(record, getCallback()).get();
+        try (var kafkaDispatcher = new KafkaDispatcher();){
+            for(int i = 0; i < 10; i++){
+                System.out.println("Enviando mensagem " + i);
+                var key = UUID.randomUUID().toString();
+                var value = key + ";9023;88091;" + LocalDateTime.now().getMinute() + "_" + LocalDateTime.now().getSecond();
+                kafkaDispatcher.send("ECOMMERCE_NEW_ORDER", key, value);
 
-            var email = "Thank you! ";
-            var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL",key, email);
-            producer.send(emailRecord, getCallback()).get();
+                var email = "Thank you! ";
+                kafkaDispatcher.send("ECOMMERCE_SEND_EMAIL",key, email);
+            }
         }
     }
 

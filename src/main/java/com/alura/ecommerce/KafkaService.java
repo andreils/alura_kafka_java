@@ -4,12 +4,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
-public class KafkaService {
+public class KafkaService implements Closeable {
 
     private final KafkaConsumer<String, String> consumer;
     private final ConsumerFunction parser;
@@ -17,6 +18,12 @@ public class KafkaService {
         this.consumer = new KafkaConsumer<String, String>(properties(groupId));
         this.parser = parser;
         consumer.subscribe(Collections.singletonList(topico));
+    }
+
+    public KafkaService(String groupId, Pattern topico, ConsumerFunction parser) {
+        this.consumer = new KafkaConsumer<String, String>(properties(groupId));
+        this.parser = parser;
+        consumer.subscribe(topico);
     }
 
     private static Properties properties(String groupId) {
@@ -39,5 +46,10 @@ public class KafkaService {
                 }
             }
         }
+    }
+
+    @Override
+    public void close() {
+        consumer.close();
     }
 }
