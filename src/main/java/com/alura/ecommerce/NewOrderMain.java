@@ -5,7 +5,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -14,8 +13,8 @@ public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         try (var orderDispatcher = new KafkaDispatcher<Order>();){
-            try (var emailDispatcher = new KafkaDispatcher<String>();){
-                for(int i = 0; i < 10; i++){
+            try (var emailDispatcher = new KafkaDispatcher<Email>();){
+                for(int i = 0; i < 5; i++){
                     System.out.println("Enviando mensagem " + i);
                     var orderKey = UUID.randomUUID().toString();
                     var userKey = UUID.randomUUID().toString();
@@ -23,7 +22,7 @@ public class NewOrderMain {
                     var order = new Order(orderKey, userKey, amount);
                     orderDispatcher.send("ECOMMERCE_NEW_ORDER", orderKey, order);
 
-                    var email = "Thank you! ";
+                    var email = new Email("email@mail.com", "Thank You, your order has processed");
                     emailDispatcher.send("ECOMMERCE_SEND_EMAIL",orderKey, email);
                 }
             }

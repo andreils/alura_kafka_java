@@ -2,6 +2,8 @@ package com.alura.ecommerce;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.util.Map;
+
 public class FraudDetectorService {
 
     public static void main(String[] args)  {
@@ -9,12 +11,14 @@ public class FraudDetectorService {
 
         try(var kafkaService = new KafkaService(FraudDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
-                fraudDetectorService::parser)){
+                fraudDetectorService::parser,
+                Order.class,
+                Map.of())){
             kafkaService.run();
         }
     }
 
-    private void parser(ConsumerRecord<String, String> record) {
+    private void parser(ConsumerRecord<String, Order> record) {
         System.out.println("============================");
         System.out.println("Processing new order, checking for fraud");
         System.out.println("KEY " + record.key());
