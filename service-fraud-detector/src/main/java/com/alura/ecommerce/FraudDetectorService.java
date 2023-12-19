@@ -12,13 +12,13 @@ public class FraudDetectorService {
         try(var kafkaService = new KafkaService(FraudDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
                 fraudDetectorService::parser,
-                com.alura.ecommerce.Order.class,
+                Order.class,
                 Map.of())){
             kafkaService.run();
         }
     }
 
-    private void parser(ConsumerRecord<String, com.alura.ecommerce.Order> record) {
+    private void parser(ConsumerRecord<String, Order> record) {
         System.out.println("============================");
         System.out.println("Processing new order, checking for fraud");
         System.out.println("KEY " + record.key());

@@ -12,14 +12,14 @@ import java.util.concurrent.ExecutionException;
 public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        try (var orderDispatcher = new KafkaDispatcher<com.alura.ecommerce.Order>();){
+        try (var orderDispatcher = new KafkaDispatcher<Order>();){
             try (var emailDispatcher = new KafkaDispatcher<Email>();){
                 for(int i = 0; i < 5; i++){
                     System.out.println("Enviando mensagem " + i);
                     var orderKey = UUID.randomUUID().toString();
                     var userKey = UUID.randomUUID().toString();
                     var amount = new BigDecimal(Math.random() * 500 + 1);
-                    var order = new com.alura.ecommerce.Order(orderKey, userKey, amount);
+                    var order = new Order(orderKey, userKey, amount);
                     orderDispatcher.send("ECOMMERCE_NEW_ORDER", orderKey, order);
 
                     var email = new Email("email@mail.com", "Thank You, your order has processed");
